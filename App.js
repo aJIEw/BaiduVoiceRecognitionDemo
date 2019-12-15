@@ -26,7 +26,7 @@ class App extends Component {
     this.state = {
       recording: false,
       recognizing: false,
-      result: [],
+      result: '',
     };
   }
 
@@ -49,7 +49,7 @@ class App extends Component {
 
         <Text style={styles.resultLabel}>{'识别结果：'}</Text>
         <View style={styles.resultContainer}>
-          <Text style={styles.resultText}>{JSON.stringify(this.state.result)}</Text>
+          <Text style={styles.resultText}>{this.state.result.length && this.state.result[0] || ''}</Text>
         </View>
 
         <Loading show={this.state.recognizing} lightMode={true}/>
@@ -57,6 +57,14 @@ class App extends Component {
         <Loading show={this.state.recording} title={'Please speaking...'}/>
       </View>
     );
+  }
+
+  componentDidMount() {
+    AudioRecorder.requestAuthorization().then((isAuthorised) => {
+      if (!isAuthorised) {
+        console.warn('recording permission denied!')
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -77,7 +85,7 @@ class App extends Component {
           if (isAuthorised) {
             this._prepareAndStart();
             // the length of a recording file should be shorter than one minutes
-            this.timeout = setTimeout(() => this.finishRecording(), 60 * 1000);
+            this.timeout = setTimeout(() => this.finishRecording(), 10 * 1000 /*60 * 1000*/);
           } else {
             Alert.alert('未获得麦克风授权！', '', [{text: '确认'}]);
             if (__DEV__) {
@@ -233,7 +241,7 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   subtitle: {
-    color: '#333',
+    color: '#de3f17',
     fontSize: 15,
     marginTop: 10,
     marginBottom: 30,
